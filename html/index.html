@@ -31,9 +31,60 @@
     #section-1 { background-color: #fef3c7; }
     #section-2 { background-color: #dbeafe; }
     #section-3 { background-color: #dcfce7; }
+
+    /* ================================================
+       ナビゲーションのスタイル（プロジェクトごとに自由にカスタマイズ）
+       ================================================ */
+    .scroll-nav {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .scroll-nav__item {
+      display: block;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      background-color: #e5e7eb;
+      color: #000;
+      font-size: 0.875rem;
+      text-align: left;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .scroll-nav__item:hover {
+      background-color: #d1d5db;
+    }
+
+    .scroll-nav__item.is-active {
+      background-color: #000;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
+
+  <!-- ================================================
+       ナビゲーション（HTML で自由に作成可能）
+       - data-scroll-target="セクションID" でターゲットを指定
+       - 中身は自由（テキスト、アイコン、画像など）
+       - button でも a タグでも OK
+       ================================================ -->
+  <nav class="scroll-nav">
+    <button class="scroll-nav__item" data-scroll-target="section-1">
+      Section 1
+    </button>
+    <button class="scroll-nav__item" data-scroll-target="section-2">
+      Section 2
+    </button>
+    <button class="scroll-nav__item" data-scroll-target="section-3">
+      Section 3
+    </button>
+  </nav>
 
   <!-- セクション -->
   <section id="section-1" class="section">Section 1</section>
@@ -57,14 +108,10 @@
       // Lenis + ScrollTrigger を初期化
       ScrollNavApp.init()
 
-      // ナビゲーションを作成
-      ScrollNavApp.createNav({
-        items: [
-          { id: 'section-1', label: 'Section 1' },
-          { id: 'section-2', label: 'Section 2' },
-          { id: 'section-3', label: 'Section 3' },
-        ],
-        position: 'top-left',
+      // ナビゲーションを初期化（HTML で作成したナビに機能を付与）
+      ScrollNavApp.initNav({
+        // navSelector: '[data-scroll-target]',  // ナビアイテムのセレクタ（デフォルト）
+        // activeClass: 'is-active',             // アクティブ時のクラス（デフォルト）
       })
     })
   </script>

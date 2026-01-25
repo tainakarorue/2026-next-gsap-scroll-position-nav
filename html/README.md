@@ -10,7 +10,7 @@ html/
 │   ├── scroll-nav-init.js  # Lenis + ScrollTrigger 初期化
 │   └── scroll-nav.js       # ナビゲーション機能
 ├── css/
-│   └── scroll-nav.css      # スタイル
+│   └── scroll-nav.css      # ベーススタイル
 ├── index.html              # サンプルページ
 └── README.md               # このファイル
 ```
@@ -56,7 +56,31 @@ HTML の `</body>` 直前に以下を追加します。
 <section id="section-3">Section 3</section>
 ```
 
-### 5. 初期化
+### 5. HTML にナビゲーションを作成
+
+`data-scroll-target` 属性でターゲットセクションの ID を指定します。
+中身は自由にカスタマイズできます（テキスト、アイコン、画像など）。
+
+```html
+<nav class="scroll-nav">
+  <!-- テキストのみ -->
+  <button class="scroll-nav__item" data-scroll-target="section-1">
+    Section 1
+  </button>
+
+  <!-- アイコン + テキスト -->
+  <button class="scroll-nav__item" data-scroll-target="section-2">
+    <i class="icon">🔥</i> Section 2
+  </button>
+
+  <!-- a タグでも OK -->
+  <a href="#section-3" class="scroll-nav__item" data-scroll-target="section-3">
+    Section 3
+  </a>
+</nav>
+```
+
+### 6. 初期化
 
 ```html
 <script>
@@ -64,15 +88,8 @@ HTML の `</body>` 直前に以下を追加します。
     // Lenis + ScrollTrigger を初期化
     ScrollNavApp.init()
 
-    // ナビゲーションを作成
-    ScrollNavApp.createNav({
-      items: [
-        { id: 'section-1', label: 'Section 1' },
-        { id: 'section-2', label: 'Section 2' },
-        { id: 'section-3', label: 'Section 3' },
-      ],
-      position: 'top-left',
-    })
+    // ナビゲーションを初期化（HTML で作成したナビに機能を付与）
+    ScrollNavApp.initNav()
   })
 </script>
 ```
@@ -94,32 +111,19 @@ ScrollNavApp.init({
 })
 ```
 
-### `ScrollNavApp.createNav(config)`
+### `ScrollNavApp.initNav(config)`
 
-ナビゲーションを作成します。
+HTML で作成したナビゲーションにスクロール連動機能を付与します。
 
 | パラメータ | 型 | デフォルト | 説明 |
 |-----------|-----|-----------|------|
-| `config.items` | array | `[]` | ナビアイテムの配列 `[{id, label}, ...]` |
-| `config.container` | string | `'body'` | ナビを挿入するセレクタ |
-| `config.position` | string | `'top-left'` | ナビの位置 |
+| `config.navSelector` | string | `'[data-scroll-target]'` | ナビアイテムのセレクタ |
 | `config.activeClass` | string | `'is-active'` | アクティブ時のクラス名 |
 
-**position の選択肢:**
-- `'top-left'`
-- `'top-right'`
-- `'bottom-left'`
-- `'bottom-right'`
-
 ```js
-ScrollNavApp.createNav({
-  items: [
-    { id: 'hero', label: 'Hero' },
-    { id: 'about', label: 'About' },
-    { id: 'contact', label: 'Contact' },
-  ],
-  position: 'top-right',
-  activeClass: 'active',
+ScrollNavApp.initNav({
+  navSelector: '[data-scroll-target]',
+  activeClass: 'is-active',
 })
 ```
 
@@ -143,7 +147,7 @@ console.log(currentSection) // 'section-1'
 
 ### `ScrollNavApp.destroyNav()`
 
-ナビゲーションを破棄します。
+ナビゲーションの機能を破棄します（イベントリスナーと ScrollTrigger をクリア）。
 
 ```js
 ScrollNavApp.destroyNav()
@@ -159,24 +163,37 @@ ScrollNavApp.destroy()
 
 ## スタイルのカスタマイズ
 
-CSS 変数やクラスを上書きしてカスタマイズできます。
+ナビゲーションは HTML で自由に作成できるため、CSS も自由にカスタマイズできます。
 
 ```css
-/* ナビアイテムの色を変更 */
+/* ナビコンテナ */
+.scroll-nav {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ナビアイテム */
 .scroll-nav__item {
-  background-color: #f0f0f0;
-  color: #333;
+  padding: 0.5rem 1rem;
+  background-color: #e5e7eb;
+  border-radius: 0.25rem;
+  color: #000;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+.scroll-nav__item:hover {
+  background-color: #d1d5db;
+}
+
+/* アクティブ状態 */
 .scroll-nav__item.is-active {
-  background-color: #007bff;
+  background-color: #000;
   color: #fff;
-}
-
-/* 位置を調整 */
-.scroll-nav--top-left {
-  top: 2rem;
-  left: 2rem;
 }
 ```
 
@@ -186,6 +203,7 @@ CSS 変数やクラスを上書きしてカスタマイズできます。
 - ナビクリックでスムーズスクロール
 - URL ハッシュとの同期（ブラウザバック対応）
 - Lenis によるスムーズなスクロール体験
+- HTML でナビを自由にカスタマイズ可能（テキスト、アイコン、画像など）
 
 ## 動作確認
 

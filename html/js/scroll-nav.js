@@ -1,6 +1,16 @@
 /**
  * ScrollNav
  * スクロール連動型ナビゲーション
+ *
+ * HTML で自由にナビを作成し、data-scroll-target 属性でセクション ID を指定します。
+ *
+ * 使用例:
+ * <nav class="scroll-nav">
+ *   <button class="scroll-nav__item" data-scroll-target="section-1">Section 1</button>
+ *   <a href="#section-2" class="scroll-nav__item" data-scroll-target="section-2">
+ *     <i class="icon">🔥</i> Section 2
+ *   </a>
+ * </nav>
  */
 ;(function () {
   'use strict'
@@ -8,83 +18,90 @@
   window.ScrollNavApp = window.ScrollNavApp || {}
 
   let activeId = ''
-  let navItems = []
-  let navContainer = null
+  let navItemElements = []
   let triggers = []
+  let activeClass = 'is-active'
 
   /**
-   * ナビゲーションを作成
+   * ナビゲーションを初期化
    * @param {Object} config - 設定オブジェクト
-   * @param {Array} config.items - ナビアイテム [{id: 'section-1', label: 'Section 1'}, ...]
-   * @param {string} config.container - ナビを挿入するセレクタ (default: 'body')
-   * @param {string} config.position - ナビの位置 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' (default: 'top-left')
+   * @param {string} config.navSelector - ナビアイテムのセレクタ (default: '[data-scroll-target]')
    * @param {string} config.activeClass - アクティブ時のクラス (default: 'is-active')
    */
-  function createNav(config) {
+  function initNav(config) {
+    config = config || {}
+
     const lenis = window.ScrollNavApp.getLenis()
     if (!lenis) {
-      console.error('ScrollNavApp: Lenis not initialized. Call ScrollNavApp.init() first.')
+      console.error(
+        'ScrollNavApp: Lenis not initialized. Call ScrollNavApp.init() first.',
+      )
       return
     }
 
-    navItems = config.items || []
-    const containerSelector = config.container || 'body'
-    const position = config.position || 'top-left'
-    const activeClass = config.activeClass || 'is-active'
+    const navSelector = config.navSelector || '[data-scroll-target]'
+    activeClass = config.activeClass || 'is-active'
 
-    // ナビコンテナ生成
-    navContainer = document.createElement('nav')
-    navContainer.className = 'scroll-nav scroll-nav--' + position
+    // 既存の DOM からナビアイテムを取得
+    navItemElements = Array.from(document.querySelectorAll(navSelector))
 
-    // ナビアイテム生成
-    navItems.forEach(function (item) {
-      const button = document.createElement('button')
-      button.className = 'scroll-nav__item'
-      button.setAttribute('data-target', item.id)
-      button.textContent = item.label
-
-      button.addEventListener('click', function () {
-        handleClick(item.id, activeClass)
-      })
-
-      navContainer.appendChild(button)
-    })
-
-    // DOM に挿入
-    const container = document.querySelector(containerSelector)
-    if (container === document.body) {
-      document.body.appendChild(navContainer)
-    } else if (container) {
-      container.appendChild(navContainer)
+    if (navItemElements.length === 0) {
+      console.warn('ScrollNavApp: No nav items found with selector "' + navSelector + '"')
+      return
     }
 
+    // 各ナビアイテムにクリックイベントを設定
+    navItemElements.forEach(function (item) {
+      const targetId = item.getAttribute('data-scroll-target')
+
+      item.addEventListener('click', function (e) {
+        e.preventDefault()
+        handleClick(targetId)
+      })
+    })
+
     // ScrollTrigger 設定
-    setupScrollTriggers(activeClass)
+    setupScrollTriggers()
 
     // ハッシュ同期
-    setupHashSync(activeClass)
+    setupHashSync()
   }
 
   /**
    * ScrollTrigger を設定
    */
-  function setupScrollTriggers(activeClass) {
+  function setupScrollTriggers() {
     // 既存のトリガーをクリア
     triggers.forEach(function (trigger) {
       trigger.kill()
     })
     triggers = []
 
-    navItems.forEach(function (item) {
+    // ユニークなターゲット ID を収集
+    const targetIds = []
+    navItemElements.forEach(function (item) {
+      const id = item.getAttribute('data-scroll-target')
+      if (id && targetIds.indexOf(id) === -1) {
+        targetIds.push(id)
+      }
+    })
+
+    targetIds.forEach(function (id) {
+      const targetElement = document.getElementById(id)
+      if (!targetElement) {
+        console.warn('ScrollNavApp: Target element not found: #' + id)
+        return
+      }
+
       const trigger = ScrollTrigger.create({
-        trigger: '#' + item.id,
+        trigger: '#' + id,
         start: 'top center',
         end: 'bottom center',
         onEnter: function () {
-          activate(item.id, activeClass)
+          activate(id)
         },
         onEnterBack: function () {
-          activate(item.id, activeClass)
+          activate(id)
         },
       })
       triggers.push(trigger)
@@ -94,7 +111,7 @@
   /**
    * アクティブ状態を更新
    */
-  function activate(id, activeClass) {
+  function activate(id) {
     activeId = id
 
     // URL ハッシュを更新
@@ -102,40 +119,37 @@
     history.replaceState(null, '', pathname + '#' + id)
 
     // クラス更新
-    if (navContainer) {
-      var buttons = navContainer.querySelectorAll('.scroll-nav__item')
-      buttons.forEach(function (btn) {
-        if (btn.getAttribute('data-target') === id) {
-          btn.classList.add(activeClass)
-        } else {
-          btn.classList.remove(activeClass)
-        }
-      })
-    }
+    navItemElements.forEach(function (item) {
+      if (item.getAttribute('data-scroll-target') === id) {
+        item.classList.add(activeClass)
+      } else {
+        item.classList.remove(activeClass)
+      }
+    })
   }
 
   /**
    * クリックハンドラ
    */
-  function handleClick(id, activeClass) {
+  function handleClick(id) {
     var lenis = window.ScrollNavApp.getLenis()
     if (!lenis) return
 
-    activate(id, activeClass)
+    activate(id)
     lenis.scrollTo('#' + id)
   }
 
   /**
    * ハッシュ同期を設定
    */
-  function setupHashSync(activeClass) {
+  function setupHashSync() {
     var lenis = window.ScrollNavApp.getLenis()
 
     function syncFromHash() {
       var hash = location.hash.replace('#', '')
       if (hash) {
         activeId = hash
-        updateActiveClass(hash, activeClass)
+        updateActiveClass(hash)
         if (lenis) {
           lenis.scrollTo('#' + hash, { immediate: true })
         }
@@ -152,17 +166,14 @@
   /**
    * アクティブクラスを更新
    */
-  function updateActiveClass(id, activeClass) {
-    if (navContainer) {
-      var buttons = navContainer.querySelectorAll('.scroll-nav__item')
-      buttons.forEach(function (btn) {
-        if (btn.getAttribute('data-target') === id) {
-          btn.classList.add(activeClass)
-        } else {
-          btn.classList.remove(activeClass)
-        }
-      })
-    }
+  function updateActiveClass(id) {
+    navItemElements.forEach(function (item) {
+      if (item.getAttribute('data-scroll-target') === id) {
+        item.classList.add(activeClass)
+      } else {
+        item.classList.remove(activeClass)
+      }
+    })
   }
 
   /**
@@ -173,24 +184,19 @@
   }
 
   /**
-   * ナビゲーションを破棄
+   * ナビゲーションを破棄（イベントリスナーと ScrollTrigger をクリア）
    */
   function destroyNav() {
     triggers.forEach(function (trigger) {
       trigger.kill()
     })
     triggers = []
-
-    if (navContainer && navContainer.parentNode) {
-      navContainer.parentNode.removeChild(navContainer)
-    }
-    navContainer = null
-    navItems = []
+    navItemElements = []
     activeId = ''
   }
 
   // 公開 API
-  window.ScrollNavApp.createNav = createNav
+  window.ScrollNavApp.initNav = initNav
   window.ScrollNavApp.getActiveId = getActiveId
   window.ScrollNavApp.destroyNav = destroyNav
 })()

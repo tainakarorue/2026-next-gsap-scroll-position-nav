@@ -1,5 +1,30 @@
 /**
- * ScrollNav Styles
+ * ScrollNav Base Styles
+ *
+ * このファイルは最小限の機能的スタイルのみを提供します。
+ * 位置やデザインはプロジェクトのCSSで自由にカスタマイズしてください。
+ *
+ * 例:
+ * .scroll-nav {
+ *   position: fixed;
+ *   top: 1rem;
+ *   left: 1rem;
+ *   z-index: 50;
+ *   display: flex;
+ *   flex-direction: column;
+ *   gap: 0.5rem;
+ * }
+ *
+ * .scroll-nav__item {
+ *   padding: 0.5rem 1rem;
+ *   background-color: #e5e7eb;
+ *   border-radius: 0.25rem;
+ * }
+ *
+ * .scroll-nav__item.is-active {
+ *   background-color: #000;
+ *   color: #fff;
+ * }
  */
 
 /* Lenis 用 html/body 設定 */
@@ -24,59 +49,10 @@ html.lenis body {
   pointer-events: none;
 }
 
-/* ナビゲーション コンテナ */
-.scroll-nav {
-  position: fixed;
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* 位置バリエーション */
-.scroll-nav--top-left {
-  top: 1rem;
-  left: 1rem;
-}
-
-.scroll-nav--top-right {
-  top: 1rem;
-  right: 1rem;
-}
-
-.scroll-nav--bottom-left {
-  bottom: 1rem;
-  left: 1rem;
-}
-
-.scroll-nav--bottom-right {
-  bottom: 1rem;
-  right: 1rem;
-}
-
-/* ナビアイテム */
+/* ナビゲーション - 最小限のベーススタイル */
 .scroll-nav__item {
-  display: block;
-  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 0.25rem;
-  background-color: #e5e7eb;
-  color: #000;
-  font-size: 0.875rem;
+  background: none;
   font-family: inherit;
-  text-align: left;
   cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.scroll-nav__item:hover {
-  background-color: #d1d5db;
-}
-
-/* アクティブ状態 */
-.scroll-nav__item.is-active {
-  background-color: #000;
-  color: #fff;
 }
