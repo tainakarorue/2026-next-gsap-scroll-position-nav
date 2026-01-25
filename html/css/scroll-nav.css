@@ -1,0 +1,82 @@
+/**
+ * ScrollNav Styles
+ */
+
+/* Lenis 用 html/body 設定 */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* ナビゲーション コンテナ */
+.scroll-nav {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* 位置バリエーション */
+.scroll-nav--top-left {
+  top: 1rem;
+  left: 1rem;
+}
+
+.scroll-nav--top-right {
+  top: 1rem;
+  right: 1rem;
+}
+
+.scroll-nav--bottom-left {
+  bottom: 1rem;
+  left: 1rem;
+}
+
+.scroll-nav--bottom-right {
+  bottom: 1rem;
+  right: 1rem;
+}
+
+/* ナビアイテム */
+.scroll-nav__item {
+  display: block;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  background-color: #e5e7eb;
+  color: #000;
+  font-size: 0.875rem;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.scroll-nav__item:hover {
+  background-color: #d1d5db;
+}
+
+/* アクティブ状態 */
+.scroll-nav__item.is-active {
+  background-color: #000;
+  color: #fff;
+}

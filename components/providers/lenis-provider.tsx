@@ -39,11 +39,12 @@ export function LenisProvider({ children }: { children: ReactNode }) {
 
     instance.on('scroll', ScrollTrigger.update)
 
+    let rafId: number
     const raf = (time: number) => {
       instance.raf(time)
-      requestAnimationFrame(raf)
+      rafId = requestAnimationFrame(raf)
     }
-    requestAnimationFrame(raf)
+    rafId = requestAnimationFrame(raf)
 
     const onRefresh = () => instance.resize()
     ScrollTrigger.addEventListener('refresh', onRefresh)
@@ -51,6 +52,7 @@ export function LenisProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false
+      cancelAnimationFrame(rafId)
       ScrollTrigger.removeEventListener('refresh', onRefresh)
       instance.destroy()
     }

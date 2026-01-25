@@ -40,7 +40,7 @@ export function ScrollNav() {
         })
       })
     },
-    { dependencies: [lenis] },
+    { dependencies: [lenis, pathname] },
   )
 
   useEffect(() => {
