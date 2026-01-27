@@ -1,3 +1,4 @@
+import { GsapSlider } from '@/components/gsap-slider'
 import { ScrollNav } from '@/components/scroll-nav'
 
 export default function Page() {
@@ -10,6 +11,10 @@ export default function Page() {
           {id}
         </section>
       ))}
+
+      <div className="py-20">
+        <GsapSlider />
+      </div>
     </>
   )
 }
