@@ -79,6 +79,115 @@
         background-color: #000;
         color: #fff;
       }
+
+      /* ================================================
+       セクション内の要素スタイル
+       ================================================ */
+      .section {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .section-inner {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+      }
+
+      .section-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+
+      .section-description {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: 2rem;
+      }
+
+      /* Section 1: Box */
+      .box-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .box {
+        width: 60px;
+        height: 60px;
+        background-color: #f97316;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1.25rem;
+      }
+
+      /* Section 2: Circle & Dots */
+      .circle-container {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        margin: 0 auto;
+      }
+
+      .circle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        background-color: #8b5cf6;
+        border-radius: 50%;
+      }
+
+      .dot {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-color: #a78bfa;
+        border-radius: 50%;
+      }
+
+      .dot-1 { top: 0; left: 50%; transform: translateX(-50%); }
+      .dot-2 { bottom: 0; left: 50%; transform: translateX(-50%); }
+      .dot-3 { left: 0; top: 50%; transform: translateY(-50%); }
+      .dot-4 { right: 0; top: 50%; transform: translateY(-50%); }
+
+      /* Section 3: Horizontal boxes & Parallax */
+      .parallax-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+        opacity: 0.5;
+        z-index: 0;
+      }
+
+      .horizontal-container {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+      }
+
+      .horizontal-box {
+        width: 70px;
+        height: 70px;
+        background-color: #10b981;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1.5rem;
+      }
     </style>
   </head>
   <body>
@@ -101,9 +210,46 @@
     </nav>
 
     <!-- セクション -->
-    <section id="section-1" class="section">Section 1</section>
-    <section id="section-2" class="section">Section 2</section>
-    <section id="section-3" class="section">Section 3</section>
+    <section id="section-1" class="section">
+      <div class="section-inner">
+        <h2 class="section-title">Section 1 - Stagger</h2>
+        <p class="section-description">複数要素を順番にアニメーション</p>
+        <div class="box-container">
+          <div class="box">1</div>
+          <div class="box">2</div>
+          <div class="box">3</div>
+          <div class="box">4</div>
+          <div class="box">5</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-2" class="section">
+      <div class="section-inner">
+        <h2 class="section-title">Section 2 - Timeline</h2>
+        <p class="section-description">複数アニメーションを連続実行</p>
+        <div class="circle-container">
+          <div class="circle"></div>
+          <div class="dot dot-1"></div>
+          <div class="dot dot-2"></div>
+          <div class="dot dot-3"></div>
+          <div class="dot dot-4"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-3" class="section">
+      <div class="parallax-bg"></div>
+      <div class="section-inner">
+        <h2 class="section-title">Section 3 - Scrub</h2>
+        <p class="section-description">スクロール量に連動してアニメーション</p>
+        <div class="horizontal-container">
+          <div class="horizontal-box">A</div>
+          <div class="horizontal-box">B</div>
+          <div class="horizontal-box">C</div>
+        </div>
+      </div>
+    </section>
 
     <div class="py-20">
       <div class="swiper gsap-slider">
@@ -145,6 +291,8 @@
 
     <!-- Swiper -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="js/gsap-swiper.js"></script>
+    <script src="js/gsap-sections.js"></script>
 
     <!-- 初期化 -->
     <script src="js/init.js"></script>

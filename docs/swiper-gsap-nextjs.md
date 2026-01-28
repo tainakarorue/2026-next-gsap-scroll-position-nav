@@ -54,7 +54,7 @@ export function GsapSlider() {
       gsap.fromTo(
         title,
         { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }
+        { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' },
       )
     }
   }
@@ -78,9 +78,7 @@ export function GsapSlider() {
               className="h-[400px] flex items-center justify-center"
               style={{ backgroundColor: slide.color }}
             >
-              <h2 className="slide-title text-4xl font-bold">
-                {slide.title}
-              </h2>
+              <h2 className="slide-title text-4xl font-bold">{slide.title}</h2>
             </div>
           </SwiperSlide>
         ))}
@@ -92,7 +90,71 @@ export function GsapSlider() {
 
 ---
 
-## 3. ページでの使用
+## 3. useGSAP の contextSafe と scope
+
+### contextSafe の役割
+
+`contextSafe` は、**アニメーションが作成される場所**によって必要かどうかが決まります。
+
+| 作成場所                               | contextSafe                |
+| -------------------------------------- | -------------------------- |
+| `useGSAP` のコールバック内で直接作成   | 不要（自動クリーンアップ） |
+| イベントハンドラ・コールバック内で作成 | **必要**                   |
+
+Swiperのイベントハンドラ（`onSlideChangeTransitionStart` など）内でアニメーションを作成する場合、`useGSAP` のコールバック外で実行されるため、`contextSafe` でラップする必要があります。
+
+```tsx
+const containerRef = useRef<HTMLDivElement>(null)
+
+// useGSAP から contextSafe を取得
+const { contextSafe } = useGSAP({ scope: containerRef })
+
+// contextSafe でラップすることで、アニメーションが適切にクリーンアップされる
+const animateSlide = contextSafe((swiper: SwiperType) => {
+  const activeSlide = swiper.slides[swiper.activeIndex]
+  const title = activeSlide?.querySelector('.slide-title')
+
+  if (title) {
+    gsap.fromTo(
+      title,
+      { opacity: 0, y: 50 },
+      { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }
+    )
+  }
+})
+
+// イベントハンドラとして使用
+<Swiper onSlideChangeTransitionStart={animateSlide}>
+```
+
+### scope の役割
+
+`scope` には主に2つの役割があります。
+
+**1. セレクタの範囲を制限**
+
+文字列セレクタを使用した場合、`scope` 内の要素のみが対象になります。
+
+```tsx
+const containerRef = useRef<HTMLDivElement>(null)
+
+useGSAP(
+  () => {
+    // scope を設定すると、containerRef 内の .box のみが対象
+    // 同じクラス名を持つ他のコンポーネントの要素に影響を与えない
+    gsap.to('.box', { x: 100 })
+  },
+  { scope: containerRef },
+)
+```
+
+**2. クリーンアップの対象範囲**
+
+コンポーネントがアンマウントされたとき、`scope` 内で作成されたアニメーションが自動的にクリーンアップされます。
+
+---
+
+## 4. ページでの使用
 
 `app/page.tsx` にコンポーネントを追加します。
 
@@ -110,7 +172,7 @@ export default function Page() {
 
 ---
 
-## 4. 応用: カスタムアニメーションパターン
+## 5. 応用: カスタムアニメーションパターン
 
 ### パターン A: フェードイン + スケール
 
@@ -121,7 +183,7 @@ const animateSlide = (swiper: SwiperType) => {
   gsap.fromTo(
     activeSlide,
     { opacity: 0, scale: 0.8 },
-    { opacity: 1, scale: 1, duration: 0.8, ease: 'back.out(1.7)' }
+    { opacity: 1, scale: 1, duration: 0.8, ease: 'back.out(1.7)' },
   )
 }
 ```
@@ -137,23 +199,19 @@ const animateSlide = (swiper: SwiperType) => {
 
   const tl = gsap.timeline()
 
-  tl.fromTo(
-    title,
-    { opacity: 0, y: 30 },
-    { opacity: 1, y: 0, duration: 0.5 }
-  )
-  .fromTo(
-    description,
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: 0.4 },
-    '-=0.2' // 前のアニメーションと0.2秒重なる
-  )
-  .fromTo(
-    button,
-    { opacity: 0, scale: 0.9 },
-    { opacity: 1, scale: 1, duration: 0.3 },
-    '-=0.1'
-  )
+  tl.fromTo(title, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5 })
+    .fromTo(
+      description,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.4 },
+      '-=0.2', // 前のアニメーションと0.2秒重なる
+    )
+    .fromTo(
+      button,
+      { opacity: 0, scale: 0.9 },
+      { opacity: 1, scale: 1, duration: 0.3 },
+      '-=0.1',
+    )
 }
 ```
 
@@ -178,7 +236,7 @@ const animateSlideIn = (swiper: SwiperType) => {
   gsap.fromTo(
     activeSlide,
     { opacity: 0, x: 50 },
-    { opacity: 1, x: 0, duration: 0.5, delay: 0.2 }
+    { opacity: 1, x: 0, duration: 0.5, delay: 0.2 },
   )
 }
 
@@ -189,7 +247,7 @@ const animateSlideIn = (swiper: SwiperType) => {
 
 ---
 
-## 5. Swiperのアニメーションを無効化する場合
+## 6. Swiperのアニメーションを無効化する場合
 
 GSAP に完全にアニメーションを委譲したい場合:
 
@@ -204,21 +262,21 @@ GSAP に完全にアニメーションを委譲したい場合:
 
 ---
 
-## 6. 主要なSwiperイベント一覧
+## 7. 主要なSwiperイベント一覧
 
-| イベント名 | タイミング |
-|-----------|-----------|
-| `onInit` | 初期化時 |
-| `onSlideChange` | スライド変更後 |
-| `onSlideChangeTransitionStart` | トランジション開始時 |
-| `onSlideChangeTransitionEnd` | トランジション終了時 |
-| `onProgress` | スワイプ中の進捗 (0-1) |
-| `onTouchStart` | タッチ/クリック開始 |
-| `onTouchEnd` | タッチ/クリック終了 |
+| イベント名                     | タイミング             |
+| ------------------------------ | ---------------------- |
+| `onInit`                       | 初期化時               |
+| `onSlideChange`                | スライド変更後         |
+| `onSlideChangeTransitionStart` | トランジション開始時   |
+| `onSlideChangeTransitionEnd`   | トランジション終了時   |
+| `onProgress`                   | スワイプ中の進捗 (0-1) |
+| `onTouchStart`                 | タッチ/クリック開始    |
+| `onTouchEnd`                   | タッチ/クリック終了    |
 
 ---
 
-## 7. TypeScript 型定義
+## 8. TypeScript 型定義
 
 ```tsx
 import type { Swiper as SwiperType } from 'swiper'
@@ -237,7 +295,7 @@ const swiperOptions: SwiperOptions = {
 
 ---
 
-## 8. トラブルシューティング
+## 9. トラブルシューティング
 
 ### スタイルが適用されない
 
